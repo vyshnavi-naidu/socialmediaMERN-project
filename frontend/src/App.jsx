@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Feed from './components/Feed';
 import Login from './components/Auth/Login';
@@ -7,29 +7,52 @@ import CreatePost from './components/CreatePost';
 import Profile from './components/Profile';
 import Users from './components/Users';
 
-export default function App(){
+export default function App() {
   const nav = useNavigate();
   const token = localStorage.getItem('token');
-  const logout = ()=>{ localStorage.clear(); nav('/login'); };
+  const logout = () => { localStorage.clear(); nav('/login'); };
+
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div>
       <header className="topbar">
-        <div className="brand" onClick={()=>nav('/')}>⚡️ SocialMERN</div>
+        <div className="brand" onClick={() => nav('/')}>⚡️ SocialMERN</div>
+
+        {/* Search */}
         <div className="searchwrap">
           <input id="global-search" placeholder="Search posts or users..." />
         </div>
-        <nav className="navlinks">
-          <Link to="/">Feed</Link>
-          <Link to="/users">People</Link>
-          {token ? <>
-            <Link to="/create">Create</Link>
-            <button className="btn small" onClick={logout}>Logout</button>
-          </> : <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>}
+
+        {/* Hamburger */}
+        <button 
+          className="hamburger" 
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <span className={menuOpen ? "line open" : "line"}></span>
+          <span className={menuOpen ? "line open" : "line"}></span>
+          <span className={menuOpen ? "line open" : "line"}></span>
+        </button>
+
+        {/* Navigation */}
+        <nav className={`navlinks ${menuOpen ? "open" : ""}`}>
+          <Link onClick={()=>setMenuOpen(false)} to="/">Feed</Link>
+          <Link onClick={()=>setMenuOpen(false)} to="/users">Users</Link>
+
+          {token ? (
+            <>
+              <Link onClick={()=>setMenuOpen(false)} to="/create">Create</Link>
+              <button className="btn small" onClick={() => { setMenuOpen(false); logout(); }}>Logout</button>
+            </>
+          ) : (
+            <>
+              <Link onClick={()=>setMenuOpen(false)} to="/login">Login</Link>
+              <Link onClick={()=>setMenuOpen(false)} to="/register">Register</Link>
+            </>
+          )}
         </nav>
       </header>
+
       <main className="container">
         <Routes>
           <Route path="/" element={<Feed />} />

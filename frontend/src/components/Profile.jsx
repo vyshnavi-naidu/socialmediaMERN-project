@@ -96,7 +96,7 @@ export default function Profile() {
         />
         <div style={{ flex: 1 }}>
           <h2 className="huge">{user.name}</h2>
-          <div className="meta">{user.email}</div>
+          
           <div style={{ height: 8 }} />
           <div className="row">
             <div className="badge">Followers: {user.followers?.length || 0}</div>

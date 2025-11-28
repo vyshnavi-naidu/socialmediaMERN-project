@@ -53,16 +53,13 @@ export default function Feed(){
   return (
     <div className="grid">
       <div className="feed">
-        <div className="card">
-          <h3 className="meta">Discover — {posts.length} posts</h3>
-          <p className="search-hint">Search updates by caption or users (try typing in the top search box)</p>
-        </div>
+        
         {posts.map(p=>(
           <article key={p._id} className="card">
             <div className="userrow">
               <img className="dp" src={(p.author.dp? (import.meta.env.VITE_API_URL || 'http://localhost:5000') + p.author.dp : 'https://via.placeholder.com/52')} />
               <div style={{flex:1}}>
-                <Link to={'/profile/'+p.author._id} className="huge" style={{fontSize:16}}>{p.author.name}</Link>
+                <Link to={'/profile/'+p.author._id} className="huge" style={{fontSize:20 , textDecoration:"none"}}>{p.author.name}</Link>
                 <div className="meta">{new Date(p.createdAt).toLocaleString()}</div>
               </div>
               <div className="row">
@@ -87,7 +84,7 @@ export default function Feed(){
         <div className="card">
           <h3>Trending</h3>
           <div className="badge">Hot • {posts.length} posts</div>
-          <p className="meta" style={{marginTop:8}}>Tip: click edit to modify your posts. Use the search box at top for instant results.</p>
+          <p className="meta" style={{marginTop:8}}>click edit to modify your posts. Use the search box at top for instant results.</p>
         </div>
         <div className="card">
           <h3>Create quick post</h3>
