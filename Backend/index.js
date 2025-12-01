@@ -18,7 +18,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 
 const PORT = process.env.PORT || 5000;
-mongoose.connect("mongodb+srv://MP-SocialMedia:MP-SocialMedia@cluster0.p8rlpxa.mongodb.net/")
+mongoose.connect("process.env.MONGO_URI")
   .then(()=> {
     console.log('Mongo connected');
     app.listen(PORT, ()=> console.log('Server listening on', PORT));
