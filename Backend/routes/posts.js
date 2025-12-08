@@ -6,15 +6,19 @@ const User = require('../models/User');
 const upload = require('../middleware/upload');
 
 // create post with photo
-router.post('/', auth, upload.single('photo'), async (req,res)=>{
-  try{
-    const { caption } = req.body;
-    const post = new Post({ author: req.user.id, caption });
-    if(req.file) post.photo = '/uploads/' + req.file.filename;
-    await post.save();
-    await post.populate('author','name dp');
+router.post('/', upload.single('photo'), async (req, res) => {
+  try {
+    const post = await Post.create({
+      caption: req.body.caption,
+      photo: req.file?.path || null,  // Cloudinary URL
+      author: req.user.id,
+    });
+
     res.json(post);
-  }catch(err){ console.error(err); res.status(500).json({ message:'Server error' }); }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Upload failed" });
+  }
 });
 
 
@@ -68,32 +72,20 @@ router.post('/:id/comment', auth, async (req,res)=>{
   }catch(err){ res.status(500).json({ message:'Server error' }); }
 });
 
-// edit post (only author)
-router.put('/:id', auth, upload.single('photo'), async (req, res) => {
+router.put('/:id', upload.single('photo'), async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if(!post) return res.status(404).json({ message:'Not found' });
+    const update = {
+      caption: req.body.caption,
+    };
 
-    const userId = req.user.id || req.user._id || req.user.userId;
-    if(post.author.toString() !== userId.toString()) 
-      return res.status(403).json({ message:'Not allowed' });
+    if (req.file) {
+      update.photo = req.file.path; // Cloudinary URL
+    }
 
-    if(req.body.caption !== undefined) post.caption = req.body.caption;
-    if(req.file) post.photo = '/uploads/' + req.file.filename;
-
-    const updatedPost = await post.save();
-
-    // Correct Mongoose 7+ populate
-    await updatedPost.populate([
-      { path: 'author', select: 'name dp' },
-      { path: 'comments.user', select: 'name dp' }
-    ]);
-
-    res.json(updatedPost);
-
-  } catch(err) {
-    console.error(err);
-    res.status(500).json({ message:'Server error' });
+    const post = await Post.findByIdAndUpdate(req.params.id, update, { new: true });
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
