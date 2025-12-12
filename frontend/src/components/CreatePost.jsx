@@ -1,29 +1,71 @@
 import React, { useState } from 'react';
 import api from '../api';
 import { useNavigate } from 'react-router-dom';
-export default function CreatePost(){
-  const [caption,setCaption]=useState('');
-  const [photo,setPhoto]=useState(null);
+
+export default function CreatePost() {
+  const [caption, setCaption] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [preview, setPreview] = useState(null);
   const nav = useNavigate();
-  const submit=async e=>{ e.preventDefault();
-    try{
-      const form = new FormData();
-      if(caption) form.append('caption', caption);
-      if(photo) form.append('photo', photo);
-      const res = await api.post('/posts', form);
-      nav('/');
-    }catch(err){ alert(err.response?.data?.message || err.message); }
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    setPhoto(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
   };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    try {
+      const form = new FormData();
+      if (caption) form.append('caption', caption);
+      if (photo) form.append('photo', photo);
+      await api.post('/posts', form);
+      nav('/'); // go back to feed
+    } catch (err) {
+      alert(err.response?.data?.message || err.message);
+    }
+  };
+
   return (
-    <div style={{maxWidth:700, margin:'24px auto'}} className="card">
+    <div style={{ maxWidth: 700, margin: '24px auto' }} className="card">
       <h2>Create a post</h2>
-      <textarea className="input" placeholder="What's happening?" value={caption} onChange={e=>setCaption(e.target.value)} />
-      <div style={{height:8}} />
-      <input type="file" onChange={e=>setPhoto(e.target.files[0])} />
-      <div style={{height:12}} />
+      <textarea
+        className="input"
+        placeholder="What's happening?"
+        value={caption}
+        onChange={(e) => setCaption(e.target.value)}
+      />
+      <div style={{ height: 8 }} />
+      <input type="file" onChange={handlePhotoChange} />
+      {preview && (
+        <img
+          src={preview}
+          alt="Preview"
+          style={{ marginTop: 12, maxHeight: 300, objectFit: 'cover' }}
+        />
+      )}
+      <div style={{ height: 12 }} />
       <div className="actions">
-        <button className="btn" onClick={submit}>Publish</button>
-        <button className="btn ghost" onClick={()=>{ setCaption(''); setPhoto(null); }}>Clear</button>
+        <button className="btn" onClick={submit}>
+          Publish
+        </button>
+        <button
+          className="btn ghost"
+          onClick={() => {
+            setCaption('');
+            setPhoto(null);
+            setPreview(null);
+          }}
+        >
+          Clear
+        </button>
       </div>
     </div>
   );

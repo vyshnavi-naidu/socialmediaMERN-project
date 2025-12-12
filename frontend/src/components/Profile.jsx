@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../api';
 import { useParams } from 'react-router-dom';
 
+
 const CURRENT_USER_ID = 'YOUR_LOGGED_IN_USER_ID';
 
 export default function Profile() {
@@ -13,6 +14,10 @@ export default function Profile() {
     return currentUser.following || [];
   });
   const [hoverFollowing, setHoverFollowing] = useState(false);
+
+  const backendURL = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace('/api', '')
+    : 'http://localhost:5000';
 
   useEffect(() => {
     loadUser();
@@ -42,6 +47,11 @@ export default function Profile() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const getPhotoURL = (path) => {
+    if (!path) return null;
+    return path.startsWith('http') ? path : `${backendURL}${path}`;
   };
 
   const updateLocalStorage = (updatedFollowing) => {
@@ -92,7 +102,7 @@ export default function Profile() {
       <div className="card" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
         <img
           className="dp"
-          src={user.dp ? (import.meta.env.VITE_API_URL || 'http://localhost:5000') + user.dp : 'https://via.placeholder.com/80'}
+          src={getPhotoURL(user.dp) || 'https://via.placeholder.com/80'}
         />
         <div style={{ flex: 1 }}>
           <h2 className="huge">{user.name}</h2>
@@ -122,10 +132,17 @@ export default function Profile() {
       </div>
 
       <h3 style={{ marginTop: 12 }}>Posts</h3>
+      {posts.length === 0 && <p>No posts yet.</p>}
       {posts.map(p => (
         <div key={p._id} className="card">
           <p>{p.caption}</p>
-          {p.photo && <img className="post-photo" src={(import.meta.env.VITE_API_URL || 'http://localhost:5000') + p.photo} />}
+          {p.photo && (
+            <img
+              className="post-photo"
+              src={getPhotoURL(p.photo)}
+              style={{ maxHeight: 400, objectFit: 'cover', marginTop: 8 }}
+            />
+          )}
         </div>
       ))}
     </div>
