@@ -3,7 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Post = require('../models/Post');
 const User = require('../models/User');
-const upload = require('../middleware/upload'); // now Cloudinary-based
+const upload = require('../middleware/upload'); // Cloudinary-based
 
 // create post with photo
 router.post('/', auth, upload.single('photo'), async (req, res) => {
